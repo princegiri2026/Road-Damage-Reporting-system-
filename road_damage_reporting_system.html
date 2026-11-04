@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoadCare Civic Portal | Road Damage Reporting System</title>
+    <!-- Tailwind CSS for clean, modern light-mode civic website styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- =====================================================================
+         1. TOP NAVIGATION BAR (Real Civic Portal Header)
+         ===================================================================== -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showTab('report')">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                    🛣️
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-lg text-slate-900 tracking-tight">RoadCare Civic Portal</span>
+                        <span class="hidden sm:inline-block text-[11px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                            Municipal Works Dept
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500">Public Road Damage Reporting & Maintenance System • Roll Nos: 46, 57, 58</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links & User Auth Button -->
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <button onclick="showTab('report')" id="tab-btn-report"
+                    class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-blue-600 text-white transition">
+                    Home & Report
+                </button>
+                <button onclick="showTab('track')" id="tab-btn-track"
+                    class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+                    Track Complaints
+                </button>
+                <button onclick="showTab('notifications')" id="tab-btn-notifications"
+                    class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+                    <span>Notifications</span>
+                    <span id="unread-badge" class="bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+                </button>
+                <button onclick="showTab('admin')" id="tab-btn-admin"
+                    class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+                    Admin Panel
+                </button>
+
+                <!-- Register / Login Button -->
+                <button onclick="openAuthModal()"
+                    class="ml-1 flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="current-user-display">Rahul Sharma (Citizen)</span>
+                    <span class="text-blue-600 underline ml-1">Switch</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- =====================================================================
+         2. CLEAN HERO BANNER WITH LIVE SUMMARY COUNTERS
+         ===================================================================== -->
+    <section class="bg-gradient-to-r from-blue-700 via-blue-800 to-slate-900 text-white no-print">
+        <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div class="max-w-xl">
+                <span class="inline-block text-xs font-semibold uppercase tracking-wider bg-blue-500/30 border border-blue-400/40 px-2.5 py-1 rounded-md mb-2">
+                    24×7 Citizen Infrastructure Helpline
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-bold leading-tight">
+                    Report Potholes, Damaged Streets & Unsafe Roads in Seconds
+                </h1>
+                <p class="text-xs sm:text-sm text-blue-100 mt-1.5">
+                    Upload a real photo, detect your live GPS coordinates on OpenStreetMap, and track municipal repair crews in real time.
+                </p>
+            </div>
+
+            <!-- Live Hero Counters -->
+            <div class="grid grid-cols-3 gap-3 sm:gap-4 w-full md:w-auto">
+                <div class="bg-white/10 backdrop-blur border border-white/15 rounded-xl px-4 py-3 text-center">
+                    <p class="text-[11px] uppercase tracking-wider text-blue-200 font-medium">Total Reported</p>
+                    <p id="hero-stat-total" class="text-2xl font-bold mt-0.5">0</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur border border-white/15 rounded-xl px-4 py-3 text-center">
+                    <p class="text-[11px] uppercase tracking-wider text-amber-200 font-medium">Under Repair</p>
+                    <p id="hero-stat-repair" class="text-2xl font-bold text-amber-300 mt-0.5">0</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur border border-white/15 rounded-xl px-4 py-3 text-center">
+                    <p class="text-[11px] uppercase tracking-wider text-emerald-200 font-medium">Resolved</p>
+                    <p id="hero-stat-resolved" class="text-2xl font-bold text-emerald-300 mt-0.5">0</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         TOAST NOTIFICATION BANNER (Replaces browser alert())
+         ===================================================================== -->
+    <div id="notification-banner" class="hidden max-w-6xl w-full mx-auto px-4 mt-4 no-print">
+        <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-3 rounded-xl shadow-sm flex items-center justify-between text-sm font-medium">
+            <div class="flex items-center gap-2">
+                <span class="text-base">✅</span>
+                <span id="notification-text">Action completed successfully!</span>
+            </div>
+            <button onclick="hideNotification()" class="text-emerald-700 hover:text-emerald-950 font-bold ml-4">✕</button>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MAIN CONTENT AREA
+         ===================================================================== -->
+    <main class="max-w-6xl w-full mx-auto px-4 py-6 flex-grow">
+
+        <!-- =================================================================
+             TAB 1: HOME & REPORT ROAD DAMAGE (Citizen Reporting + Live Map)
+             ================================================================= -->
+        <section id="section-report" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Column: Citizen Road Issue Submission Form (7 cols) -->
+            <div class="lg:col-span-7 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="border-b border-slate-100 pb-4 mb-5 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Report a Road Damage Issue</h2>
+                        <p class="text-xs text-slate-500">All fields marked with * are mandatory for municipal dispatch.</p>
+                    </div>
+                    <span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">
+                        Step 1 of 1
+                    </span>
+                </div>
+
+                <form id="damage-form" onsubmit="submitReport(event)" class="space-y-4">
+                    <!-- Row 1: Citizen Name & Phone/Email -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Citizen Full Name *</label>
+                            <input type="text" id="citizen-name" required value="Rahul Sharma" placeholder="Enter your full name"
+                                class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number / Email *</label>
+                            <input type="text" id="citizen-phone" required value="9876543210" placeholder="10-digit mobile or email"
+                                class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Street / Landmark Address & Live GPS Button -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-slate-700">Street Address / Road Landmark *</label>
+                            <span id="gps-status-text" class="text-[11px] text-blue-600 font-medium">Ready to detect GPS</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="road-location" required placeholder="e.g., GT Road near Law Gate, Phagwara"
+                                class="flex-grow border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="button" onclick="detectLiveLocation()"
+                                class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center justify-center gap-1.5 transition">
+                                <span>📍</span>
+                                <span id="gps-btn-label">Detect My Live Location</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: GPS Coordinates (Auto-filled or Editable) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">GPS Coordinates *</label>
+                            <input type="text" id="road-coords" required value="31.2536, 75.7037" readonly
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono text-slate-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Damage Category *</label>
+                            <select id="damage-type" required
+                                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="Pothole">Pothole</option>
+                                <option value="Deep Road Crack">Deep Road Crack</option>
+                                <option value="Waterlogging / Broken Drain">Waterlogging / Broken Drain</option>
+                                <option value="Damaged Speed Breaker">Damaged Speed Breaker</option>
+                                <option value="Street Cave-In">Street Cave-In</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Severity / Priority *</label>
+                            <select id="damage-priority" required
+                                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="Low">Low (Minor Issue)</option>
+                                <option value="Medium" selected>Medium (Slows Traffic)</option>
+                                <option value="High">High (Accident Risk)</option>
+                                <option value="Critical">Critical (Road Blocked)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: Real Photo Upload & Sample Photo Button -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="space-y-1.5 flex-grow">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-semibold text-slate-700">Upload Road Damage Photograph</label>
+                                <button type="button" onclick="useSamplePhoto()"
+                                    class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 underline">
+                                    Use Sample Pothole Photo
+                                </button>
+                            </div>
+                            <input type="file" id="damage-photo" accept="image/*" onchange="previewImage(event)"
+                                class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                            <p class="text-[11px] text-slate-400">Supports JPG, PNG, WEBP from your phone camera or laptop.</p>
+                        </div>
+                        <div class="flex items-center gap-3 self-center sm:self-auto">
+                            <img id="photo-preview" src="https://placehold.co/400x260/e2e8f0/334155?text=Upload+Road+Photo"
+                                alt="Damage Preview" class="w-28 h-20 object-cover rounded-lg border border-slate-300 shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Row 5: Detailed Description -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Detailed Description *</label>
+                        <textarea id="damage-desc" rows="3" required
+                            placeholder="Describe the size/depth of the pothole or road damage and nearby landmarks..."
+                            class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-1 flex flex-wrap items-center justify-between gap-3">
+                        <p class="text-xs text-slate-500">Generates an instant Tracking ID & alerts the Municipal Control Room.</p>
+                        <button type="submit"
+                            class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm shadow-sm transition">
+                            Submit Official Report →
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Column: Real Interactive OpenStreetMap & Quick Guide (5 cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                <!-- Live OpenStreetMap Card -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex-grow flex flex-col">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">📍 Live GPS Location Map</h3>
+                            <p id="map-caption" class="text-xs text-slate-500">Showing pinned coordinates on OpenStreetMap</p>
+                        </div>
+                        <span id="map-coord-badge" class="text-[11px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200">
+                            31.2536, 75.7037
+                        </span>
+                    </div>
+
+                    <!-- Embedded Real OpenStreetMap Iframe -->
+                    <div class="w-full h-64 sm:h-72 rounded-xl overflow-hidden border border-slate-300 bg-slate-100 flex-grow">
+                        <iframe id="osm-map-frame"
+                            class="w-full h-full border-0"
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=75.6937%2C31.2436%2C75.7137%2C31.2636&amp;layer=mapnik&amp;marker=31.2536%2C75.7037"
+                            loading="lazy"
+                            title="Live Road Location Map">
+                        </iframe>
+                    </div>
+
+                    <!-- Quick Preset Campus/City Locations for Easy Testing -->
+                    <div class="mt-3 pt-3 border-t border-slate-100">
+                        <p class="text-[11px] font-semibold text-slate-500 mb-2">Quick Pin Nearby Locations:</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" onclick="setMapLocation(31.2536, 75.7037, 'Law Gate Main Road, LPU Phagwara')"
+                                class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                                Law Gate LPU
+                            </button>
+                            <button type="button" onclick="setMapLocation(31.2240, 75.7708, 'GT Road Near Bus Stand, Phagwara')"
+                                class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                                Phagwara Bus Stand
+                            </button>
+                            <button type="button" onclick="setMapLocation(31.3260, 75.5762, 'BMC Chowk Flyover, Jalandhar')"
+                                class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                                BMC Chowk Jalandhar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How It Works Civic Card -->
+                <div class="bg-blue-50/70 border border-blue-200 p-4 rounded-2xl">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-blue-900 mb-2">How Municipal Resolution Works</h4>
+                    <ol class="text-xs text-slate-700 space-y-1.5 list-decimal list-inside">
+                        <li><strong>Report Logged:</strong> Citizen uploads photo & GPS location.</li>
+                        <li><strong>Priority Verification:</strong> Municipal Admin reviews severity level.</li>
+                        <li><strong>Crew Dispatch:</strong> Assigned to Patching, Asphalt, or Drainage team.</li>
+                        <li><strong>Resolved:</strong> Status updated and citizen receives notification.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             TAB 2: TRACK COMPLAINTS (Search, Status Filter & Map Preview)
+             ================================================================= -->
+        <section id="section-track" class="hidden space-y-5">
+            <!-- Search & Filter Bar -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Track Submitted Road Complaints</h2>
+                    <p class="text-xs text-slate-500">Search by Tracking ID (e.g. RDR-101) or street name, or filter by repair stage.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="search-input" oninput="renderComplaints()"
+                        placeholder="Search ID, street, or issue..."
+                        class="border border-slate-300 rounded-xl px-3.5 py-2 text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Status Filter Pills -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="setStatusFilter('All')" id="filter-All"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white">
+                    All Reports
+                </button>
+                <button onclick="setStatusFilter('Pending')" id="filter-Pending"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-300 hover:bg-slate-100">
+                    ⏳ Pending
+                </button>
+                <button onclick="setStatusFilter('Assigned')" id="filter-Assigned"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-300 hover:bg-slate-100">
+                    👷 Assigned
+                </button>
+                <button onclick="setStatusFilter('In Progress')" id="filter-In Progress"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-300 hover:bg-slate-100">
+                    🔧 In Progress
+                </button>
+                <button onclick="setStatusFilter('Resolved')" id="filter-Resolved"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-300 hover:bg-slate-100">
+                    ✓ Resolved
+                </button>
+            </div>
+
+            <!-- Complaints Grid -->
+            <div id="complaints-list" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Populated dynamically by JavaScript -->
+            </div>
+        </section>
+
+        <!-- =================================================================
+             TAB 3: REAL NOTIFICATIONS SECTION
+             ================================================================= -->
+        <section id="section-notifications" class="hidden space-y-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Citizen & Municipal Notifications</h2>
+                    <p class="text-xs text-slate-500">Real-time activity log of new road damage submissions, crew assignments, and repair updates.</p>
+                </div>
+                <button onclick="markAllNotificationsRead()"
+                    class="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg border border-slate-300 self-start sm:self-auto">
+                    ✓ Mark All as Read
+                </button>
+            </div>
+
+            <div id="notifications-list" class="space-y-2.5">
+                <!-- Populated dynamically by JavaScript -->
+            </div>
+        </section>
+
+        <!-- =================================================================
+             TAB 4: MUNICIPAL ADMIN PANEL & REPORTING
+             ================================================================= -->
+        <section id="section-admin" class="hidden space-y-5">
+            <!-- Admin Summary Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-slate-500 font-semibold uppercase">Total Complaints</p>
+                    <p id="stat-total" class="text-2xl font-bold text-slate-900 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-red-600 font-semibold uppercase">Pending Review</p>
+                    <p id="stat-pending" class="text-2xl font-bold text-red-600 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-amber-600 font-semibold uppercase">Assigned / Active</p>
+                    <p id="stat-progress" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-emerald-600 font-semibold uppercase">Resolved Safe</p>
+                    <p id="stat-resolved" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+                </div>
+            </div>
+
+            <!-- Admin Table & Reporting Controls -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-4 border-b border-slate-200 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Municipal Authorities Maintenance Control</h2>
+                        <p class="text-xs text-slate-500">Prioritize road damage reports, assign maintenance teams, update status, and export official reports.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 no-print">
+                        <button onclick="downloadCSVReport()"
+                            class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg font-semibold shadow-sm">
+                            ⬇ Download CSV Report
+                        </button>
+                        <button onclick="window.print()"
+                            class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2 rounded-lg font-semibold">
+                            🖨️ Print Summary Report
+                        </button>
+                        <button onclick="resetSampleData()"
+                            class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg border border-slate-300 font-medium">
+                            Reset Demo Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs uppercase">
+                                <th class="p-3 border-b">ID & Photo</th>
+                                <th class="p-3 border-b">Location & Issue</th>
+                                <th class="p-3 border-b">Priority</th>
+                                <th class="p-3 border-b">Assign Maintenance Team</th>
+                                <th class="p-3 border-b">Repair Status</th>
+                                <th class="p-3 border-b text-right no-print">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="divide-y divide-slate-200">
+                            <!-- Populated dynamically by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =====================================================================
+         USER REGISTRATION / LOGIN MODAL
+         ===================================================================== -->
+    <div id="auth-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">User Registration & Sign In</h3>
+                    <p class="text-xs text-slate-500">Switch between Citizen and Municipal Admin roles</p>
+                </div>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form onsubmit="saveUserLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name *</label>
+                    <input type="text" id="login-name" required value="Rahul Sharma" placeholder="Enter your full name"
+                        class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email or Mobile Number *</label>
+                    <input type="text" id="login-phone" required value="9876543210" placeholder="Enter phone or email"
+                        class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Select Portal Role *</label>
+                    <select id="login-role" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm bg-white">
+                        <option value="Citizen">Citizen (Report & Track Issues)</option>
+                        <option value="Municipal Admin">Municipal Admin (Manage & Assign Teams)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAuthModal()"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-xs font-semibold shadow-sm">
+                        Save & Continue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         FOOTER
+         ===================================================================== -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-10 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span><strong>RoadCare Civic Portal</strong> — Road Damage Reporting System</span>
+            <span>LPU CA1 Project Assessment | Team Roll Nos: <strong>46, 57, 58</strong></span>
+        </div>
+    </footer>
+
+    <!-- =====================================================================
+         STRUCTURED JAVASCRIPT (DIVIDED INTO 3 VIVA-FRIENDLY MODULES)
+         ===================================================================== -->
+    <script>
+        /* =====================================================================
+           MODULE 1: USER AUTHENTICATION, NAVIGATION & INITIAL DATA (Roll No. 46)
+           ===================================================================== */
+
+        // Clean SVG Data URI for sample road pothole photo
+        const SAMPLE_POTHOLE_PHOTO = "https://placehold.co/500x320/fee2e2/991b1b?text=Road+Pothole+Evidence";
+        const DEFAULT_IMAGE = "https://placehold.co/500x320/e2e8f0/334155?text=Road+Damage+Photo";
+        let uploadedImageData = DEFAULT_IMAGE;
+        let activeStatusFilter = "All";
+
+        // Initial Realistic Reports for Phagwara / Jalandhar / LPU Corridor
+        const SAMPLE_REPORTS = [
+            {
+                id: "RDR-101",
+                name: "Amanpreet Singh",
+                phone: "9876543210",
+                location: "GT Road Near Bus Stand, Phagwara",
+                coords: "31.2240, 75.7708",
+                type: "Pothole",
+                priority: "Critical",
+                description: "Large 3-foot deep pothole in the middle lane causing heavy traffic congestion and two-wheeler skidding.",
+                team: "Team A - Road Patching",
+                status: "In Progress",
+                date: "04 Nov 2026",
+                photo: "https://placehold.co/500x320/fee2e2/991b1b?text=Deep+Pothole+(GT+Road)"
+            },
+            {
+                id: "RDR-102",
+                name: "Neha Gupta",
+                phone: "9812345678",
+                location: "Law Gate Main Road, LPU Phagwara",
+                coords: "31.2536, 75.7037",
+                type: "Waterlogging / Broken Drain",
+                priority: "High",
+                description: "Overflowing storm drain slab broken near main market turn, creating waterlogging across both lanes.",
+                team: "Team C - Drainage & Civil",
+                status: "Assigned",
+                date: "04 Nov 2026",
+                photo: "https://placehold.co/500x320/e0f2fe/075985?text=Waterlogging+(Law+Gate)"
+            },
+            {
+                id: "RDR-103",
+                name: "Rohan Verma",
+                phone: "9988776655",
+                location: "BMC Chowk Flyover Approach, Jalandhar",
+                coords: "31.3260, 75.5762",
+                type: "Deep Road Crack",
+                priority: "Low",
+                description: "Longitudinal asphalt cracks along the left service lane repaired and sealed by municipal crew.",
+                team: "Team B - Asphalt Resurfacing",
+                status: "Resolved",
+                date: "02 Nov 2026",
+                photo: "https://placehold.co/500x320/dcfce7/166534?text=Resurfaced+Road+(Resolved)"
+            }
+        ];
+
+        const SAMPLE_NOTIFICATIONS = [
+            {
+                id: 1,
+                text: "Complaint RDR-101 assigned to Team A - Road Patching (Status: In Progress).",
+                time: "04 Nov 2026, 09:30 AM",
+                unread: true
+            },
+            {
+                id: 2,
+                text: "New high-priority report RDR-102 logged at Law Gate Main Road, LPU Phagwara.",
+                time: "04 Nov 2026, 10:15 AM",
+                unread: true
+            }
+        ];
+
+        // Load data from localStorage or fallback to sample data
+        let reports = JSON.parse(localStorage.getItem("roadcare_reports_v2")) || SAMPLE_REPORTS;
+        let notifications = JSON.parse(localStorage.getItem("roadcare_notifs_v2")) || SAMPLE_NOTIFICATIONS;
+        let currentUser = JSON.parse(localStorage.getItem("roadcare_user_v2")) || {
+            name: "Rahul Sharma",
+            phone: "9876543210",
+            role: "Citizen"
+        };
+
+        // Save state to browser localStorage
+        function saveToStorage() {
+            localStorage.setItem("roadcare_reports_v2", JSON.stringify(reports));
+            localStorage.setItem("roadcare_notifs_v2", JSON.stringify(notifications));
+        }
+
+        // Switch between the 4 main navigation tabs
+        function showTab(tabName) {
+            const tabs = ["report", "track", "notifications", "admin"];
+            tabs.forEach(t => {
+                document.getElementById("section-" + t).classList.add("hidden");
+                const btn = document.getElementById("tab-btn-" + t);
+                btn.className = "px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5";
+            });
+
+            document.getElementById("section-" + tabName).classList.remove("hidden");
+            document.getElementById("tab-btn-" + tabName).className =
+                "px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-blue-600 text-white transition flex items-center gap-1.5";
+
+            if (tabName === "track") renderComplaints();
+            if (tabName === "notifications") renderNotifications();
+            if (tabName === "admin") renderAdminTable();
+        }
+
+        // Open and close the User Registration / Login modal
+        function openAuthModal() {
+            document.getElementById("login-name").value = currentUser.name;
+            document.getElementById("login-phone").value = currentUser.phone;
+            document.getElementById("login-role").value = currentUser.role;
+            document.getElementById("auth-modal").classList.remove("hidden");
+        }
+
+        function closeAuthModal() {
+            document.getElementById("auth-modal").classList.add("hidden");
+        }
+
+        // Save user registration/login details in localStorage
+        function saveUserLogin(event) {
+            event.preventDefault();
+            currentUser = {
+                name: document.getElementById("login-name").value.trim(),
+                phone: document.getElementById("login-phone").value.trim(),
+                role: document.getElementById("login-role").value
+            };
+            localStorage.setItem("roadcare_user_v2", JSON.stringify(currentUser));
+            updateUserHeader();
+            closeAuthModal();
+            showNotification(`Signed in as ${currentUser.name} (${currentUser.role})`);
+
+            if (currentUser.role === "Municipal Admin") {
+                showTab("admin");
+            }
+        }
+
+        function updateUserHeader() {
+            document.getElementById("current-user-display").textContent = `${currentUser.name} (${currentUser.role})`;
+            document.getElementById("citizen-name").value = currentUser.name;
+            document.getElementById("citizen-phone").value = currentUser.phone;
+        }
+
+        // Display green feedback banner
+        function showNotification(message) {
+            const banner = document.getElementById("notification-banner");
+            document.getElementById("notification-text").textContent = message;
+            banner.classList.remove("hidden");
+        }
+
+        function hideNotification() {
+            document.getElementById("notification-banner").classList.add("hidden");
+        }
+
+
+        /* =====================================================================
+           MODULE 2: REPORTING, REAL GPS GEOLOCATION & PHOTO UPLOAD (Roll No. 57)
+           ===================================================================== */
+
+        // Update the embedded OpenStreetMap iframe and form fields with given coordinates
+        function setMapLocation(lat, lon, addressLabel) {
+            const latFixed = Number(lat).toFixed(4);
+            const lonFixed = Number(lon).toFixed(4);
+            const coordsStr = `${latFixed}, ${lonFixed}`;
+
+            document.getElementById("road-coords").value = coordsStr;
+            document.getElementById("map-coord-badge").textContent = coordsStr;
+            if (addressLabel) {
+                document.getElementById("road-location").value = addressLabel;
+                document.getElementById("map-caption").textContent = addressLabel;
+            }
+
+            // Calculate bounding box around marker for OpenStreetMap embed
+            const delta = 0.008;
+            const minLon = (Number(lon) - delta).toFixed(4);
+            const minLat = (Number(lat) - delta).toFixed(4);
+            const maxLon = (Number(lon) + delta).toFixed(4);
+            const maxLat = (Number(lat) + delta).toFixed(4);
+
+            const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${latFixed}%2C${lonFixed}`;
+            document.getElementById("osm-map-frame").src = osmUrl;
+        }
+
+        // Detect real user GPS location using HTML5 Geolocation + OpenStreetMap Nominatim Reverse Geocoding
+        function detectLiveLocation() {
+            const statusText = document.getElementById("gps-status-text");
+            const btnLabel = document.getElementById("gps-btn-label");
+
+            statusText.textContent = "Requesting browser GPS...";
+            btnLabel.textContent = "Detecting...";
+
+            if (!navigator.geolocation) {
+                fallbackLocation("Browser GPS unavailable — pinned to Law Gate, Phagwara");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    let resolvedAddress = `Live GPS Location (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data && data.display_name) {
+                                resolvedAddress = data.display_name.split(",").slice(0, 4).join(",");
+                            }
+                        }
+                    } catch (err) {
+                        // Use coordinate label if offline or rate-limited
+                    }
+
+                    setMapLocation(lat, lon, resolvedAddress);
+                    statusText.textContent = "✓ Live GPS locked";
+                    btnLabel.textContent = "Detect My Live Location";
+                    showNotification(`Live GPS Location captured: ${resolvedAddress}`);
+                },
+                function() {
+                    // Automatic fallback if location permission is denied or blocked inside preview iframe
+                    fallbackLocation("GPS permission blocked in preview — pinned to GT Road / Law Gate, Phagwara");
+                },
+                { timeout: 6000 }
+            );
+        }
+
+        function fallbackLocation(msg) {
+            setMapLocation(31.2536, 75.7037, "GT Road near Law Gate, Phagwara, Punjab");
+            document.getElementById("gps-status-text").textContent = "✓ Pinned to Phagwara Corridor";
+            document.getElementById("gps-btn-label").textContent = "Detect My Live Location";
+            showNotification(msg);
+        }
+
+        // Convert real uploaded image file to Base64 Data URL via FileReader
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageData = e.target.result;
+                document.getElementById("photo-preview").src = uploadedImageData;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Quick sample pothole photo button for rapid demo
+        function useSamplePhoto() {
+            uploadedImageData = SAMPLE_POTHOLE_PHOTO;
+            document.getElementById("photo-preview").src = SAMPLE_POTHOLE_PHOTO;
+            showNotification("Sample road pothole photo attached!");
+        }
+
+        // Submit new citizen road damage complaint
+        function submitReport(event) {
+            event.preventDefault();
+
+            const nextNumber = 101 + reports.length;
+            const newId = "RDR-" + nextNumber;
+            const today = new Date().toLocaleDateString("en-GB", {
+                day: "2-digit", month: "short", year: "numeric"
+            });
+
+            const locationVal = document.getElementById("road-location").value.trim();
+            const typeVal = document.getElementById("damage-type").value;
+            const priorityVal = document.getElementById("damage-priority").value;
+
+            const newReport = {
+                id: newId,
+                name: document.getElementById("citizen-name").value.trim(),
+                phone: document.getElementById("citizen-phone").value.trim(),
+                location: locationVal,
+                coords: document.getElementById("road-coords").value.trim(),
+                type: typeVal,
+                priority: priorityVal,
+                description: document.getElementById("damage-desc").value.trim(),
+                team: "Unassigned",
+                status: "Pending",
+                date: today,
+                photo: uploadedImageData
+            };
+
+            reports.unshift(newReport);
+            addSystemNotification(`New ${priorityVal} priority report ${newId} (${typeVal}) submitted at ${locationVal}.`);
+            saveToStorage();
+            updateAllCounters();
+
+            // Reset form fields
+            document.getElementById("road-location").value = "";
+            document.getElementById("damage-desc").value = "";
+            document.getElementById("damage-photo").value = "";
+            uploadedImageData = DEFAULT_IMAGE;
+            document.getElementById("photo-preview").src = DEFAULT_IMAGE;
+
+            showNotification(`Official Complaint Registered! Your Tracking ID is ${newId}`);
+            showTab("track");
+        }
+
+
+        /* =====================================================================
+           MODULE 3: TRACKING, NOTIFICATIONS & ADMIN PANEL (Roll No. 58)
+           ===================================================================== */
+
+        // Add a timestamped notification to the system log
+        function addSystemNotification(text) {
+            const nowStr = new Date().toLocaleString("en-GB", {
+                day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+            });
+            notifications.unshift({
+                id: Date.now(),
+                text: text,
+                time: nowStr,
+                unread: true
+            });
+            updateUnreadBadge();
+        }
+
+        function updateUnreadBadge() {
+            const unreadCount = notifications.filter(n => n.unread).length;
+            const badge = document.getElementById("unread-badge");
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? "inline-block" : "none";
+        }
+
+        function markAllNotificationsRead() {
+            notifications.forEach(n => n.unread = false);
+            saveToStorage();
+            updateUnreadBadge();
+            renderNotifications();
+            showNotification("All notifications marked as read.");
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById("notifications-list");
+            if (notifications.length === 0) {
+                container.innerHTML = `<div class="bg-white p-6 rounded-2xl border text-center text-sm text-slate-500">No notifications yet.</div>`;
+                return;
+            }
+
+            container.innerHTML = notifications.map(n => `
+                <div class="bg-white p-4 rounded-xl border ${n.unread ? 'border-blue-300 bg-blue-50/40' : 'border-slate-200'} flex items-start justify-between gap-3 shadow-xs">
+                    <div class="flex items-start gap-3">
+                        <span class="mt-0.5 text-base">${n.unread ? '🔔' : '📋'}</span>
+                        <div>
+                            <p class="text-sm ${n.unread ? 'font-semibold text-slate-900' : 'text-slate-700'}">${n.text}</p>
+                            <p class="text-xs text-slate-400 mt-0.5">${n.time}</p>
+                        </div>
+                    </div>
+                    ${n.unread ? `<span class="text-[10px] font-bold uppercase bg-blue-600 text-white px-2 py-0.5 rounded-full">New</span>` : ''}
+                </div>
+            `).join("");
+        }
+
+        // Filter buttons in Track Complaints tab
+        function setStatusFilter(status) {
+            activeStatusFilter = status;
+            const statuses = ["All", "Pending", "Assigned", "In Progress", "Resolved"];
+            statuses.forEach(s => {
+                const btn = document.getElementById("filter-" + s);
+                if (s === status) {
+                    btn.className = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white";
+                } else {
+                    btn.className = "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-300 hover:bg-slate-100";
+                }
+            });
+            renderComplaints();
+        }
+
+        // Helper functions for priority & status badges
+        function getPriorityBadge(priority) {
+            if (priority === "Critical") return `<span class="bg-red-600 text-white px-2.5 py-0.5 rounded text-xs font-semibold">Critical</span>`;
+            if (priority === "High") return `<span class="bg-red-100 text-red-700 px-2.5 py-0.5 rounded text-xs font-semibold">High Priority</span>`;
+            if (priority === "Medium") return `<span class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded text-xs font-semibold">Medium Priority</span>`;
+            return `<span class="bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded text-xs font-semibold">Low Priority</span>`;
+        }
+
+        function getStatusBadge(status) {
+            if (status === "Resolved") return `<span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-bold">✓ Resolved</span>`;
+            if (status === "In Progress") return `<span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-bold">🔧 In Progress</span>`;
+            if (status === "Assigned") return `<span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full text-xs font-bold">👷 Assigned</span>`;
+            return `<span class="bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full text-xs font-bold">⏳ Pending</span>`;
+        }
+
+        // View a complaint's coordinates directly on the embedded OpenStreetMap
+        function viewComplaintOnMap(coords, locationLabel) {
+            const parts = (coords || "31.2536, 75.7037").split(",");
+            const lat = parseFloat(parts[0]) || 31.2536;
+            const lon = parseFloat(parts[1]) || 75.7037;
+            showTab("report");
+            setMapLocation(lat, lon, locationLabel);
+            showNotification(`Showing map location for: ${locationLabel}`);
+        }
+
+        // Render Citizen Complaint Cards
+        function renderComplaints() {
+            const listContainer = document.getElementById("complaints-list");
+            const query = document.getElementById("search-input").value.toLowerCase().trim();
+
+            const filtered = reports.filter(r => {
+                const matchesStatus = (activeStatusFilter === "All") || (r.status === activeStatusFilter);
+                const matchesQuery =
+                    r.id.toLowerCase().includes(query) ||
+                    r.location.toLowerCase().includes(query) ||
+                    r.type.toLowerCase().includes(query) ||
+                    r.name.toLowerCase().includes(query);
+                return matchesStatus && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="col-span-2 bg-white p-8 rounded-2xl text-center border border-slate-200">
+                        <p class="text-sm font-semibold text-slate-700">No matching road damage complaints found.</p>
+                        <p class="text-xs text-slate-400 mt-1">Try clearing your search filter or submit a new issue.</p>
+                    </div>`;
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(r => `
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between gap-3 hover:border-blue-300 transition">
+                    <div class="flex items-start gap-4">
+                        <img src="${r.photo}" alt="Road Damage"
+                            onerror="this.src='https://placehold.co/400x260/e2e8f0/334155?text=Road+Photo'"
+                            class="w-28 h-24 object-cover rounded-xl border border-slate-200 flex-shrink-0">
+                        <div class="flex-grow min-w-0">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">${r.id}</span>
+                                ${getStatusBadge(r.status)}
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base mt-1.5 truncate">${r.type}</h3>
+                            <p class="text-xs text-slate-600 mt-0.5">📍 ${r.location}</p>
+                            <p class="text-[11px] font-mono text-slate-400 mt-0.5">GPS: ${r.coords || '31.2536, 75.7037'}</p>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">${r.description}</p>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
+                        <div class="flex items-center gap-2">
+                            ${getPriorityBadge(r.priority)}
+                            <span>👷 <strong>${r.team}</strong></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span>👤 ${r.name} • ${r.date}</span>
+                            <button onclick="viewComplaintOnMap('${r.coords || '31.2536, 75.7037'}', '${r.location.replace(/'/g, "")}')"
+                                class="text-blue-600 hover:text-blue-800 font-semibold underline">
+                                View on Map
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        // Update Hero Counters & Admin Counters
+        function updateAllCounters() {
+            const total = reports.length;
+            const pending = reports.filter(r => r.status === "Pending").length;
+            const inRepair = reports.filter(r => r.status === "Assigned" || r.status === "In Progress").length;
+            const resolved = reports.filter(r => r.status === "Resolved").length;
+
+            // Hero section counters
+            document.getElementById("hero-stat-total").textContent = total;
+            document.getElementById("hero-stat-repair").textContent = inRepair;
+            document.getElementById("hero-stat-resolved").textContent = resolved;
+
+            // Admin section counters
+            document.getElementById("stat-total").textContent = total;
+            document.getElementById("stat-pending").textContent = pending;
+            document.getElementById("stat-progress").textContent = inRepair;
+            document.getElementById("stat-resolved").textContent = resolved;
+
+            updateUnreadBadge();
+        }
+
+        // Render Municipal Admin Management Table
+        function renderAdminTable() {
+            updateAllCounters();
+            const tbody = document.getElementById("admin-table-body");
+
+            tbody.innerHTML = reports.map((r, index) => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3">
+                        <div class="flex items-center gap-2.5">
+                            <img src="${r.photo}" alt="Photo" class="w-12 h-10 object-cover rounded border border-slate-200">
+                            <div>
+                                <div class="font-bold text-blue-700 text-xs">${r.id}</div>
+                                <div class="text-[11px] text-slate-400">${r.date}</div>
+                                <div class="text-[11px] text-slate-600">${r.name}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-3">
+                        <div class="font-semibold text-slate-800 text-xs">${r.type}</div>
+                        <div class="text-xs text-slate-600 max-w-xs">${r.location}</div>
+                        <div class="text-[10px] font-mono text-slate-400">GPS: ${r.coords || '31.2536, 75.7037'}</div>
+                    </td>
+                    <td class="p-3">
+                        <select id="prio-${index}" class="border border-slate-300 rounded-lg px-2 py-1.5 text-xs bg-white">
+                            <option value="Low" ${r.priority === "Low" ? "selected" : ""}>Low</option>
+                            <option value="Medium" ${r.priority === "Medium" ? "selected" : ""}>Medium</option>
+                            <option value="High" ${r.priority === "High" ? "selected" : ""}>High</option>
+                            <option value="Critical" ${r.priority === "Critical" ? "selected" : ""}>Critical</option>
+                        </select>
+                    </td>
+                    <td class="p-3">
+                        <select id="team-${index}" class="border border-slate-300 rounded-lg px-2 py-1.5 text-xs bg-white">
+                            <option value="Unassigned" ${r.team === "Unassigned" ? "selected" : ""}>Unassigned</option>
+                            <option value="Team A - Road Patching" ${r.team === "Team A - Road Patching" ? "selected" : ""}>Team A - Road Patching</option>
+                            <option value="Team B - Asphalt Resurfacing" ${r.team === "Team B - Asphalt Resurfacing" ? "selected" : ""}>Team B - Asphalt Resurfacing</option>
+                            <option value="Team C - Drainage & Civil" ${r.team === "Team C - Drainage & Civil" ? "selected" : ""}>Team C - Drainage & Civil</option>
+                        </select>
+                    </td>
+                    <td class="p-3">
+                        <select id="status-${index}" class="border border-slate-300 rounded-lg px-2 py-1.5 text-xs bg-white">
+                            <option value="Pending" ${r.status === "Pending" ? "selected" : ""}>Pending</option>
+                            <option value="Assigned" ${r.status === "Assigned" ? "selected" : ""}>Assigned</option>
+                            <option value="In Progress" ${r.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                            <option value="Resolved" ${r.status === "Resolved" ? "selected" : ""}>Resolved</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-right space-x-1 whitespace-nowrap no-print">
+                        <button onclick="updateReport(${index})"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs">
+                            Save Update
+                        </button>
+                        <button onclick="deleteReport(${index})"
+                            class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        // Save Admin row updates & log notification
+        function updateReport(index) {
+            const r = reports[index];
+            r.priority = document.getElementById(`prio-${index}`).value;
+            r.team = document.getElementById(`team-${index}`).value;
+            r.status = document.getElementById(`status-${index}`).value;
+
+            addSystemNotification(`Municipal Admin updated ${r.id}: Assigned to ${r.team} | Status changed to "${r.status}".`);
+            saveToStorage();
+            renderAdminTable();
+            showNotification(`Saved changes for ${r.id} (Status: ${r.status})`);
+        }
+
+        // Delete a complaint row
+        function deleteReport(index) {
+            const removedId = reports[index].id;
+            reports.splice(index, 1);
+            saveToStorage();
+            renderAdminTable();
+            showNotification(`Deleted complaint record ${removedId}`);
+        }
+
+        // Export all road damage complaints as a real CSV file for Municipal Reporting
+        function downloadCSVReport() {
+            const headers = ["Tracking ID", "Date", "Citizen Name", "Phone", "Location", "GPS Coordinates", "Damage Type", "Priority", "Assigned Team", "Status"];
+            const rows = reports.map(r => [
+                r.id,
+                r.date,
+                `"${r.name}"`,
+                `"${r.phone}"`,
+                `"${r.location.replace(/"/g, '""')}"`,
+                `"${r.coords || ''}"`,
+                `"${r.type}"`,
+                r.priority,
+                `"${r.team}"`,
+                r.status
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8,"
+                + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "RoadCare_Municipal_Report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification("Downloaded RoadCare_Municipal_Report.csv!");
+        }
+
+        // Restore default sample data
+        function resetSampleData() {
+            localStorage.removeItem("roadcare_reports_v2");
+            localStorage.removeItem("roadcare_notifs_v2");
+            reports = JSON.parse(JSON.stringify(SAMPLE_REPORTS));
+            notifications = JSON.parse(JSON.stringify(SAMPLE_NOTIFICATIONS));
+            saveToStorage();
+            renderAdminTable();
+            renderComplaints();
+            showNotification("Demo data restored to initial state!");
+        }
+
+        // Initialize application when window loads
+        window.onload = function() {
+            updateUserHeader();
+            updateAllCounters();
+            renderComplaints();
+            renderNotifications();
+            renderAdminTable();
+        };
+    </script>
+</body>
+</html>
