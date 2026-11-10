@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f5ef" />
+    <meta name="description" content="RoadWatch is a CSE 326 academic prototype for reporting and tracking road damage." />
+    <title>RoadWatch — safer roads start here</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="prototype-note"><span class="note-dot"></span> Academic prototype · Demo reports stay in this browser</div>
+    <header class="site-header">
+      <a class="brand" href="#home" aria-label="RoadWatch home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M10 27 14 5h4l4 22M11.6 18h8.8M13.1 11h5.8" /></svg></span>
+        <span>road<span class="brand-light">watch</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-link active" href="#home">Home</a>
+        <a class="nav-link" href="#reports">Explore reports</a>
+        <a class="nav-link" href="#how-it-works">How it works</a>
+      </nav>
+      <button class="button button-dark header-cta" data-open-report>Report a road issue <span aria-hidden="true">↗</span></button>
+      <button class="mobile-menu" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
+    </header>
+
+    <main id="home">
+      <section class="hero section-wrap">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> A little care goes a long way</div>
+          <h1>Safer roads<br />start <span class="serif-word">here.</span></h1>
+          <p class="hero-lede">Spot a pothole or damaged road? Share the location, add a few details, and help your community see what needs attention.</p>
+          <div class="hero-actions">
+            <button class="button button-lime" data-open-report>Report a road issue <span class="button-arrow">↗</span></button>
+            <a class="text-link" href="#reports">See community reports <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-trust"><div class="avatar-stack" aria-hidden="true"><span>R</span><span>M</span><span>A</span><span>+</span></div><span><strong>Community powered</strong><br />Every report helps build a clearer picture.</span></div>
+        </div>
+        <div class="hero-art" aria-label="Illustration of a road map with a reported pothole">
+          <div class="map-label label-north">NORTH AVENUE</div><div class="map-label label-market">MARKET ST.</div><div class="map-label label-park">PARK ROAD</div>
+          <div class="map-park"><span>MEMORIAL<br />PARK</span></div>
+          <div class="map-road road-one"></div><div class="map-road road-two"></div><div class="map-road road-three"></div><div class="map-road road-four"></div>
+          <div class="map-dash dash-one"></div><div class="map-dash dash-two"></div><div class="map-dash dash-three"></div>
+          <div class="map-pin pin-one"><span>!</span><i></i></div><div class="map-pin pin-two"><span>!</span><i></i></div><div class="map-pin pin-three"><span>✓</span><i></i></div>
+          <div class="map-card"><span class="map-card-icon">⌖</span><div><strong>Community map</strong><small>See issues reported nearby</small></div><span class="map-card-arrow">↗</span></div>
+          <span class="map-orbit orbit-one"></span><span class="map-orbit orbit-two"></span>
+          <span class="art-caption">A clearer view of the roads we share.</span>
+        </div>
+      </section>
+
+      <section class="stats-strip section-wrap" aria-label="Community report summary">
+        <div class="stats-intro"><span class="status-pulse"></span><span>Community snapshot</span><small>Sample data for demonstration</small></div>
+        <div class="stat"><strong id="stat-total">128</strong><span>Reports shared</span></div>
+        <div class="stat"><strong id="stat-open">34</strong><span>Need attention</span></div>
+        <div class="stat"><strong id="stat-resolved">76</strong><span>Marked resolved</span></div>
+        <div class="stat stat-note"><span>Small actions.<br /><em>Safer journeys.</em></span><span class="note-sparkle">✳</span></div>
+      </section>
+
+      <section class="reports-section section-wrap" id="reports">
+        <div class="section-heading">
+          <div><div class="eyebrow"><span class="eyebrow-line"></span> From your community</div><h2>Roads that need<br /><span class="serif-word">a closer look.</span></h2></div>
+          <p>Browse recent reports, understand the issue, and show support when a road needs attention.</p>
+        </div>
+        <div class="report-workspace">
+          <div class="report-column">
+            <div class="report-toolbar">
+              <div class="filter-tabs" role="group" aria-label="Filter reports">
+                <button class="filter-tab selected" data-filter="all">All reports <span id="count-all">06</span></button>
+                <button class="filter-tab" data-filter="Open">Open</button>
+                <button class="filter-tab" data-filter="In progress">In progress</button>
+                <button class="filter-tab" data-filter="Resolved">Resolved</button>
+              </div>
+              <label class="search-box"><span aria-hidden="true">⌕</span><input id="report-search" type="search" placeholder="Search location" aria-label="Search reports by location" /></label>
+            </div>
+            <div class="report-list" id="report-list" aria-live="polite"></div>
+            <div class="empty-state" id="empty-state" hidden><span>⌕</span><strong>No reports found</strong><p>Try a different search or filter.</p></div>
+            <button class="button button-outline load-more" id="load-more">View all reports <span>↓</span></button>
+          </div>
+          <aside class="map-panel">
+            <div class="map-panel-top"><div><span class="map-eyebrow">LIVE VIEW</span><h3>Issue map</h3></div><button class="map-expand" aria-label="Map overview">↗</button></div>
+            <div class="mini-map" aria-label="Illustrative map of reports around the city">
+              <div class="mini-block block-a"></div><div class="mini-block block-b"></div><div class="mini-block block-c"></div><div class="mini-block block-d"></div><div class="mini-block block-e"></div>
+              <div class="mini-road mini-road-a"></div><div class="mini-road mini-road-b"></div><div class="mini-road mini-road-c"></div><div class="mini-road mini-road-d"></div>
+              <span class="mini-label ml-a">RIVER ST.</span><span class="mini-label ml-b">CENTRAL AVE.</span><span class="mini-label ml-c">EAST PARK</span>
+              <button class="mini-pin mp-a" aria-label="Open pothole near River Street">!</button><button class="mini-pin mp-b" aria-label="Open surface damage near Central Avenue">!</button><button class="mini-pin mp-c done" aria-label="Resolved report near East Park">✓</button><button class="mini-pin mp-d" aria-label="Open pothole near Lake Road">!</button>
+            </div>
+            <div class="map-legend"><span><i class="legend-open"></i> Needs attention</span><span><i class="legend-done"></i> Resolved</span></div>
+            <div class="map-callout"><span class="callout-icon">✳</span><p><strong>Better roads begin with noticing.</strong><br />Your local knowledge helps make the next trip safer.</p></div>
+            <button class="button button-dark map-report" data-open-report>Pin a road issue <span>↗</span></button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="how-section" id="how-it-works">
+        <div class="section-wrap how-inner">
+          <div class="how-heading"><div class="eyebrow eyebrow-light"><span class="eyebrow-line"></span> Simple by design</div><h2>Notice it.<br /><span class="serif-word">Report it.</span></h2><p>A small report can help a whole community travel with more confidence.</p><button class="button button-lime" data-open-report>Make a report <span class="button-arrow">↗</span></button></div>
+          <div class="steps-grid">
+            <article class="step-card"><span class="step-number">01</span><span class="step-icon">⌖</span><h3>Pin the location</h3><p>Tell us the road name or nearby landmark so the issue is easy to find.</p><span class="step-rule"></span></article>
+            <article class="step-card"><span class="step-number">02</span><span class="step-icon">▧</span><h3>Describe the damage</h3><p>Choose an issue type and severity, then add a short description.</p><span class="step-rule"></span></article>
+            <article class="step-card"><span class="step-number">03</span><span class="step-icon">↗</span><h3>Share with neighbors</h3><p>Your report joins the community view so others can see what you noticed.</p><span class="step-rule"></span></article>
+            <article class="step-card"><span class="step-number">04</span><span class="step-icon">✓</span><h3>Follow its progress</h3><p>Check the status and see when a community report is marked resolved.</p><span class="step-rule"></span></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing section-wrap"><div class="closing-mark">✳</div><p>Built for the roads<br />we <span class="serif-word">share.</span></p><button class="button button-dark" data-open-report>Help make a safer route <span>↗</span></button></section>
+    </main>
+
+    <footer class="site-footer"><a class="brand footer-brand" href="#home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M10 27 14 5h4l4 22M11.6 18h8.8M13.1 11h5.8" /></svg></span><span>road<span class="brand-light">watch</span></span></a><span>CSE 326 · Road Damage Reporting System</span><a href="#home">Back to top ↑</a></footer>
+
+    <div class="modal-backdrop" id="report-modal" hidden>
+      <section class="report-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" aria-label="Close report form">×</button>
+        <div class="modal-kicker"><span class="status-pulse"></span> COMMUNITY REPORT</div>
+        <h2 id="modal-title">What did you <span class="serif-word">notice?</span></h2>
+        <p class="modal-intro">Share a few details so the community can understand the road issue.</p>
+        <form id="report-form">
+          <label class="form-field">Road or nearby landmark <span>*</span><input name="location" required maxlength="90" placeholder="e.g. Main Street, near the library" /></label>
+          <div class="form-row"><label class="form-field">Issue type <span>*</span><select name="type" required><option value="">Choose an issue</option><option>Pothole</option><option>Cracked pavement</option><option>Damaged road edge</option><option>Waterlogging</option><option>Other road damage</option></select></label><label class="form-field">Severity <span>*</span><select name="severity" required><option value="">Choose severity</option><option>Low</option><option>Medium</option><option>High</option></select></label></div>
+          <label class="form-field">What should people know? <textarea name="description" required maxlength="240" rows="3" placeholder="Add a short description of the damage..."></textarea></label>
+          <div class="upload-hint"><span>＋</span><div><strong>Photo attachment</strong><small>Photo upload is a visual demo feature in this prototype.</small></div><button type="button" id="photo-button">Choose photo</button><input type="file" id="photo-input" accept="image/*" hidden /></div>
+          <button class="button button-dark submit-report" type="submit">Share this report <span>↗</span></button>
+          <p class="privacy-note">Demo only: this report is saved locally in your browser and is not sent to a road authority.</p>
+        </form>
+      </section>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
